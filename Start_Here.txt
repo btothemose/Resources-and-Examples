@@ -1,0 +1,5 @@
+This is a collection of learning tools and references for various topics. Much of this content originates from Linux Academy, Udemy, or Codecademy, and all reference notes are a conglomeration of thoughts and contributions from all three.
+
+This is not a method of teaching any of the topics, but rather references for different concepts.
+
+In language folders such as Python, the function (in terms of reference) of the script should be at the top.
