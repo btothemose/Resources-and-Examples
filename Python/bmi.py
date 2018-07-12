@@ -1,5 +1,7 @@
 #!/bin/python
 
+# Python loops and conditionals example
+
 def gatherinfo():
     height = float(raw_input("What's your height? (in/m) "))
     weight = float(raw_input("What's your weight? (lb/kg) "))

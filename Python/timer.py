@@ -1,6 +1,12 @@
 #!/bin/python
 
+# Python library package example
+
 import time
+
+# from time import localtime, strftime, mktime
+# above would import specific used functions from time
+# instead of entire file
 
 start_time = time.localtime()
 
