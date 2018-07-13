@@ -25,4 +25,4 @@ else:
         for line in lines:
             print(line.strip()[::-1])
 finally:
-    print("\nWe're finished\n")
+    print("\nFile end\n")
