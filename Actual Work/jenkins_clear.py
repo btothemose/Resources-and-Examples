@@ -1,5 +1,8 @@
 #!/bin/python
 
+###########################################################
+# UNFINISHED, DO NOT USE THIS ON ANY LIVE JENKINS SERVERS #
+###########################################################
 import sys,time,os
 days_to_keep=120
 current_time=time.time()
