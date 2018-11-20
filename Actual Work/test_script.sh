@@ -86,8 +86,8 @@ fi
 #####
 echo "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
 # vvv these lines are for testing only vvv
-ssh $fqobn 'sudo -u bnadmin echo $cust $code >> fake_migration_old.txt'
-echo "Test complete on $oldbn"
+test1=$(ssh $fqobn 'echo "Test complete on "`hostname`"."')
+echo $test1
 # ^^^ these lines are for testing only ^^^
 # ssh $fqobn 'bnTransferCustomer -c $cust $code -m bn60ms01.dub.baynote.net'
 
@@ -96,7 +96,7 @@ echo "Test complete on $oldbn"
 #####
 echo "Copying/moving transferred data on target ironchef master."
 # vvv these lines are for testing only vvv
-ssh $fqnbn 'sudo -u bnadmin echo test >> fake_migration_new.txt'
-echo "Test complete on $newbn"
+test2=$(ssh $fqnbn 'echo "Test complete on "`hostname`"."')
+echo $test2
 # ^^^ these lines are for testing only ^^^
 # ssh $fqnbn 'cp -a /var/tmp/Migration/$cust-$code-transfer/config/* /usr/local/baynote/config/customers/; mv /var/tmp/Migration/$cust-$code-transfer/data/* /usr/local/baynote/data/'
