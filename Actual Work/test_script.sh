@@ -77,7 +77,7 @@ elif [[ $newbn == bn60 ]];
 then
 	fqnbn="bn60ms01.dub.baynote.net"
 else
-	echo "Error; ironchef master does not exist. Did you make a typo? If not, this script is probably outdated or otherwise broken."
+	echo "Error; ironchef master does not exist. Did you make a typo? You do that sometimes."
 	exit 1
 fi
 
@@ -85,18 +85,21 @@ fi
 # bnTransferCustomer portion
 #####
 echo "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
-# vvv these lines are for testing only vvv
-test1=$(ssh $fqobn 'echo "Test complete on "`hostname`"."')
-echo $test1
-# ^^^ these lines are for testing only ^^^
-# ssh $fqobn 'bnTransferCustomer -c $cust $code -m bn60ms01.dub.baynote.net'
+# vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
+otest1=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
+echo $otest1
+# vvvvvvvvv Actual Migration Lines vvvvvvvvv
+# ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
 
 #####
 # Target ironchef master portion
 #####
+cppath="/var/tmp/Migration/"$cust"-"$code"-transfer/config/\* /usr/local/baynote/config/customers/"
+mvpath="/var/tmp/Migration/"$cust"-"$code"-transfer/data/\* /usr/local/baynote/data/"
 echo "Copying/moving transferred data on target ironchef master."
-# vvv these lines are for testing only vvv
-test2=$(ssh $fqnbn 'echo "Test complete on "`hostname`"."')
-echo $test2
-# ^^^ these lines are for testing only ^^^
-# ssh $fqnbn 'cp -a /var/tmp/Migration/$cust-$code-transfer/config/* /usr/local/baynote/config/customers/; mv /var/tmp/Migration/$cust-$code-transfer/data/* /usr/local/baynote/data/'
+# vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
+ntest2=$(ssh $fqnbn "echo WOULD RUN: cp -a $cppath; echo WOULD RUN: mv $mvpath")
+echo $ntest2
+# vvvvvvvvv Actual Migration Lines vvvvvvvvv
+# ssh $fqnbn "cp -a $cppath; mv $mvpath"
+# echo $endout
