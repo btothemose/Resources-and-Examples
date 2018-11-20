@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#####
+##############################
 # Establishing the customer and ironchef master
-#####
+##############################
 echo "Which customer will you be migrating today? (format: cust code)"
 read cust code
 echo "Finding ironchef master for "$cust"_"$code
@@ -19,9 +19,9 @@ fi
 echo $cust"_"$code" found on "$oldbn". Continue? (y/n)"
 read cont1
 
-#####
+##############################
 # Establishing the target ironchef master
-#####
+##############################
 if [[ $cont1 == y || $cont1 == Y ]];
 then
 	echo "Which ironchef master will you be moving to? (format: bn03)"
@@ -35,9 +35,9 @@ else
 	exit 1
 fi
 
-#####
+##############################
 # Creating FQDN out of the oldbn variable
-#####
+##############################
 if [[ $oldbn == bn03 || $oldbn == bn11 ]];
 then
 	fqobn=$oldbn"ms01.sjc01.baynote.net"
@@ -58,9 +58,9 @@ else
 	exit 1
 fi
 
-#####
+##############################
 # Creating FQDN out of the newbn variable
-#####
+##############################
 if [[ $newbn == bn03 || $newbn == bn11 ]];
 then
 	fqnbn=$newbn"ms01.sjc01.baynote.net"
@@ -81,9 +81,9 @@ else
 	exit 1
 fi
 
-#####
+##############################
 # bnTransferCustomer portion
-#####
+##############################
 echo "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
 otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
@@ -91,9 +91,9 @@ echo $otest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 # ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
 
-#####
+##############################
 # Target ironchef master portion
-#####
+##############################
 cppath="/var/tmp/Migration/"$cust"-"$code"-transfer/config/\* /usr/local/baynote/config/customers/"
 mvpath="/var/tmp/Migration/"$cust"-"$code"-transfer/data/\* /usr/local/baynote/data/"
 echo "Copying/moving transferred data on target ironchef master."
