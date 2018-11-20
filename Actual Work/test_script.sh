@@ -86,8 +86,8 @@ fi
 #####
 echo "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-otest1=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
-echo $otest1
+otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
+echo $otest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 # ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
 
@@ -98,8 +98,8 @@ cppath="/var/tmp/Migration/"$cust"-"$code"-transfer/config/\* /usr/local/baynote
 mvpath="/var/tmp/Migration/"$cust"-"$code"-transfer/data/\* /usr/local/baynote/data/"
 echo "Copying/moving transferred data on target ironchef master."
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-ntest2=$(ssh $fqnbn "echo WOULD RUN: cp -a $cppath; echo WOULD RUN: mv $mvpath")
-echo $ntest2
+ntest=$(ssh $fqnbn "echo WOULD RUN: cp -a $cppath; echo WOULD RUN: mv $mvpath")
+echo $ntest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 # ssh $fqnbn "cp -a $cppath; mv $mvpath"
 # echo $endout
