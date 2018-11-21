@@ -102,4 +102,3 @@ ntest=$(ssh $fqnbn "echo WOULD RUN: cp -a $cppath; echo WOULD RUN: mv $mvpath")
 echo $ntest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 # ssh $fqnbn "cp -a $cppath; mv $mvpath"
-# echo $endout
