@@ -103,13 +103,13 @@ echo $otest
 ##############################
 # Target ironchef master portion
 ##############################
-cppath="cp -a /var/tmp/Migration/"$cust"-"$code"-transfer/config/\* /usr/local/baynote/config/customers/"
-mvpath="mv /var/tmp/Migration/"$cust"-"$code"-transfer/data/\* /usr/local/baynote/data/"
+cppath="cp -a /var/tmp/Migration/$cust-$code-transfer/config/* /usr/local/baynote/config/customers/"
+mvpath="mv /var/tmp/Migration/$cust-$code-transfer/data/* /usr/local/baynote/data/"
 bndb="bndb -e \"create database $cust $code\""
-fordb="for db in ${cust}_${code}; do for i in {1..3}; do ssh bn60qs0${i} \"bndb -e \\\"create database \${db};\\\"\";done;done;"
+fordb="for db in ${cust}_$code; do for i in {1..3}; do ssh bn60qs0${i} \"bndb -e \\\"create database \${db};\\\"\";done;done;"
 echo "Copying/moving transferred data on target ironchef master."
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-ntest=$(ssh $fqnbn "echo WOULD RUN: cp -a $cppath; echo WOULD RUN: mv $mvpath")
+ntest=$(ssh $fqnbn "echo WOULD RUN: $cppath; echo WOULD RUN: $mvpath; echo WOULD RUN: $bndb; echo WOULD RUN: $fordb")
 echo $ntest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 # ssh $fqnbn "$cppath; $mvpath; $bndb; $fordb"
