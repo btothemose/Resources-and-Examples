@@ -14,7 +14,7 @@ fi
 ##############################
 echo "Which customer will you be migrating today? (format: cust code)"
 read cust code
-echo "Finding ironchef master for "$cust"_"$code
+echo "Finding ironchef master for ${cust}_$code"
 oldbn=$(ssh bn03ms01 "find-customer $cust $code")
 if [[ $oldbn == Usag* ]];
 then
@@ -22,7 +22,7 @@ then
 	exit 1
 elif [[ $oldbn == "" ]];
 then
-	echo $cust"_"$code" not found anywhere. You should either panic or check your spelling."
+	echo "${cust}_$code not found anywhere. You should either panic or check your spelling."
 	exit 1
 fi
 echo $cust"_"$code" found on "$oldbn". Continue? (y/n)"
