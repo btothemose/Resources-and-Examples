@@ -5,8 +5,8 @@
 ##############################
 if [[ "$(whoami)" != "bnadmin" ]];
 then
-		echo "Must be executed as bnadmin."
-		exit 1
+	echo "Must be executed as bnadmin."
+	exit 1
 fi
 
 ##############################
