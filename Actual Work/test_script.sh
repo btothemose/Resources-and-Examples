@@ -107,7 +107,7 @@ cppath="cp -a /var/tmp/Migration/$cust-$code-transfer/config/* /usr/local/baynot
 mvpath="mv /var/tmp/Migration/$cust-$code-transfer/data/* /usr/local/baynote/data/"
 bndb="bndb -e \"create database $cust $code\""
 fordb="for db in ${cust}_$code; do for i in {1..3}; do ssh bn60qs0${i} \"bndb -e \\\"create database \${db};\\\"\";done;done;"
-cluster="  <customer name="${cust}" code="${code}" template=\"NORMAL1\"/>"
+cluster="sed \"\\\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>\" /usr/local/baynote/config/cluster.xml"
 echo "Copying/moving transferred data on target ironchef master."
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
 ntest=$(ssh $fqnbn "echo WOULD RUN: $cppath; echo WOULD RUN: $mvpath; echo WOULD RUN: $bndb; echo WOULD RUN: $fordb")
