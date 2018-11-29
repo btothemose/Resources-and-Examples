@@ -3,11 +3,11 @@
 ##############################
 # Preliminary user check
 ##############################
-if [[ "$(whoami)" != "bnadmin" ]];
-then
-	echo "Must be executed as bnadmin."
-	exit 1
-fi
+#if [[ "$(whoami)" != "bnadmin" ]];
+#then
+#	echo "Must be executed as bnadmin."
+#	exit 1
+#fi
 
 ##############################
 # Establishing the customer and ironchef master
