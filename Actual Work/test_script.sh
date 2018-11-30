@@ -3,6 +3,7 @@
 ##############################
 # Preliminary user check
 ##############################
+
 if [[ "$(whoami)" != "bnadmin" ]];
 then
 	printf "Must be executed as bnadmin."
@@ -12,6 +13,7 @@ fi
 ##############################
 # Establishing the customer and ironchef master
 ##############################
+
 printf "Which customer will you be migrating today? (format: cust code)\n"
 read cust code
 printf "Finding ironchef master for ${cust}_${code}\n"
@@ -31,6 +33,7 @@ read cont1
 ##############################
 # Establishing the target ironchef master
 ##############################
+
 if [[ $cont1 == y || $cont1 == Y ]];
 then
 	printf "Which ironchef master will you be moving to? (format: bn03)\n"
@@ -47,6 +50,7 @@ fi
 ##############################
 # Creating FQDN out of the oldbn variable
 ##############################
+
 if [[ $oldbn == bn03 || $oldbn == bn11 ]];
 then
 	fqobn=$oldbn"ms01.sjc01.baynote.net"
@@ -70,6 +74,7 @@ fi
 ##############################
 # Creating FQDN out of the newbn variable
 ##############################
+
 if [[ $newbn == bn03 || $newbn == bn11 ]];
 then
 	fqnbn=$newbn"ms01.sjc01.baynote.net"
@@ -91,14 +96,32 @@ else
 fi
 
 ##############################
+# Validation check
+##############################
+
+printf "About to proceed with bnTransferCustomer for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n)\n"
+read ictp1
+if [[ $ictp1 != y ]];
+then
+	printf "Terminating.\n"
+	exit 1
+fi
+
+##############################
 # bnTransferCustomer portion
 ##############################
-printf "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn\n"
-ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
-printf "bnTransferCustomer complete for ${cust}_${code} from $fqobn to $fqnbn.\n"
-printf "Proceed with target ironchef master section? (y/n)\n"
-read ictp
-if [[ $ictp != y ]];
+
+printf "Beginning bnTransferCustomer for ${cust}_${code} from ${fqobn} to ${fqnbn}\n"
+ssh $fqobn "bnTransferCustomer -c ${cust} ${code} -m ${fqnbn}"
+printf "bnTransferCustomer complete for ${cust}_${code} from ${fqobn} to ${fqnbn}.\n"
+
+##############################
+# Validation check
+##############################
+
+printf "Proceed with ${fqnbn} section? (y/n)\n"
+read ictp2
+if [[ $ictp2 != y ]];
 then
 	printf "Terminating.\n"
 	exit 1
