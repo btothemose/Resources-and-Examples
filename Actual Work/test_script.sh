@@ -3,11 +3,11 @@
 ##############################
 # Preliminary user check
 ##############################
-#if [[ "$(whoami)" != "bnadmin" ]];
-#then
-#	printf "Must be executed as bnadmin."
-#	exit 1
-#fi
+if [[ "$(whoami)" != "bnadmin" ]];
+then
+	printf "Must be executed as bnadmin."
+	exit 1
+fi
 
 ##############################
 # Establishing the customer and ironchef master
@@ -94,18 +94,13 @@ fi
 # bnTransferCustomer portion
 ##############################
 printf "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn\n"
-# vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-printf "Running as test. Nothing will be executed.\n"
-otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn\n")
-printf $otest
-# vvvvvvvvv Actual Migration Lines vvvvvvvvv
-#ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
+ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
 printf "bnTransferCustomer complete for ${cust}_${code} from $fqobn to $fqnbn.\n"
 printf "Proceed with target ironchef master section? (y/n)\n"
 read ictp
 if [[ $ictp != y ]];
 then
-	printf "Terminating."
+	printf "Terminating.\n"
 	exit 1
 fi
 
@@ -114,20 +109,17 @@ fi
 ##############################
 
 printf "Copying/moving transferred data on target ironchef master.\n"
-# vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-printf "Running as test. Nothing will be executed.\n"
-# vvvvvvvvv Actual Migration Lines vvvvvvvvv
-#ssh $fqnbn << EOF
-# 	cp -a /var/tmp/Migration/${cust}-${code}-transfer/config/* /usr/local/baynote/config/customers/
-#	mv /var/tmp/Migration/${cust}-${code}-transfer/data/* /usr/local/baynote/data/
-#	bndb -e "create database ${cust}_${code}"
-#	for db in ${cust}_$code; do for i in {1..2}; do ssh bn60qs0${i} "bndb -e \"create database ${db};\"";done;done;
-#	sed -i "\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>" /usr/local/baynote/config/cluster.xml
-#	bnSyncThisCluster -y
-#	gunzip -c /var/tmp/Migration/${cust}-${code}-transfer/sql/${cust}_${code}.sql.gz | sed "s/${oldbn}/${newbn}/g" | bndb replication
-#	bnsctl StartCustomer ${cust} ${code}
-#	for i in {1..2}; do ssh bn60qs0${i} "bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f";done;
-#EOF
+ssh $fqnbn << EOF
+ 	cp -a /var/tmp/Migration/${cust}-${code}-transfer/config/* /usr/local/baynote/config/customers/
+	mv /var/tmp/Migration/${cust}-${code}-transfer/data/* /usr/local/baynote/data/
+	bndb -e "create database ${cust}_${code}"
+	for db in ${cust}_$code; do for i in {1..2}; do ssh bn60qs0${i} "bndb -e \"create database ${db};\"";done;done;
+	sed -i "\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>" /usr/local/baynote/config/cluster.xml
+	bnSyncThisCluster -y
+	gunzip -c /var/tmp/Migration/${cust}-${code}-transfer/sql/${cust}_${code}.sql.gz | sed "s/${oldbn}/${newbn}/g" | bndb replication
+	bnsctl StartCustomer ${cust} ${code}
+	for i in {1..2}; do ssh bn60qs0${i} "bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f";done;
+EOF
 printf "Copied/moved transferred data on $fqnbn. ${cust}_${code} database created on master and question servers.\n"
 printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart when safe to do so.\n"
 
