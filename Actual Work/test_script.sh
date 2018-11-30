@@ -5,27 +5,27 @@
 ##############################
 #if [[ "$(whoami)" != "bnadmin" ]];
 #then
-#	echo "Must be executed as bnadmin."
+#	printf "Must be executed as bnadmin."
 #	exit 1
 #fi
 
 ##############################
 # Establishing the customer and ironchef master
 ##############################
-echo "Which customer will you be migrating today? (format: cust code)"
+printf "Which customer will you be migrating today? (format: cust code)"
 read cust code
-echo "Finding ironchef master for ${cust}_$code"
-oldbn=$(ssh bn03ms01 "find-customer $cust $code")
-if [[ $oldbn == Usag* ]];
+printf "Finding ironchef master for ${cust}_${code}"
+oldbn=$(ssh bn03ms01 "find-customer ${cust} ${code}")
+if [[ ${oldbn} == Usag* ]];
 then
-	echo "Nope, you made a typo. Bye."
+	printf "Nope, you made a typo. Bye."
 	exit 1
-elif [[ $oldbn == "" ]];
+elif [[ ${oldbn} == "" ]];
 then
-	echo "${cust}_$code not found anywhere. You should either panic or check your spelling."
+	printf "${cust}_${code} not found anywhere. You should either panic or check your spelling."
 	exit 1
 fi
-echo $cust"_"$code" found on "$oldbn". Continue? (y/n)"
+printf ${cust}"_"${code}" found on "${oldbn}". Continue? (y/n)"
 read cont1
 
 ##############################
@@ -33,14 +33,14 @@ read cont1
 ##############################
 if [[ $cont1 == y || $cont1 == Y ]];
 then
-	echo "Which ironchef master will you be moving to? (format: bn03)"
+	printf "Which ironchef master will you be moving to? (format: bn03)"
 	read newbn
 elif [[ $cont1 == n || $cont1 == N ]];
 then
-	echo "Fine then. Be that way."
+	printf "Fine then. Be that way."
 	exit 1
 else
-	echo "What? That's not a yes or no. Come back sober."
+	printf "What? That's not a yes or no. Come back sober."
 	exit 1
 fi
 
@@ -63,7 +63,7 @@ elif [[ $oldbn == bn60 ]];
 then
 	fqobn="bn60ms01.dub.baynote.net"
 else
-	echo "Error; ironchef master does not exist. This script is probably outdated or otherwise broken."
+	printf "Error; ironchef master does not exist. This script is probably outdated or otherwise broken."
 	exit 1
 fi
 
@@ -86,31 +86,38 @@ elif [[ $newbn == bn60 ]];
 then
 	fqnbn="bn60ms01.dub.baynote.net"
 else
-	echo "Error; ironchef master does not exist. Did you make a typo? You do that sometimes."
+	printf "Error; ironchef master does not exist. Did you make a typo? You do that sometimes."
 	exit 1
 fi
 
 ##############################
 # bnTransferCustomer portion
 ##############################
-echo "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
+printf "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
+printf "Running as test. Nothing will be executed."
 otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
-echo $otest
+printf $otest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
-# ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
+#ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
+printf "bnTransferCustomer complete for ${cust}_${code} from $fqobn to $fqnbn."
 
 ##############################
 # Target ironchef master portion
 ##############################
-cppath="cp -a /var/tmp/Migration/$cust-$code-transfer/config/* /usr/local/baynote/config/customers/"
-mvpath="mv /var/tmp/Migration/$cust-$code-transfer/data/* /usr/local/baynote/data/"
-bndb="bndb -e \"create database $cust $code\""
-fordb="for db in ${cust}_$code; do for i in {1..3}; do ssh bn60qs0${i} \"bndb -e \\\"create database \${db};\\\"\";done;done;"
-cluster="sed \"\\\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>\" /usr/local/baynote/config/cluster.xml"
-echo "Copying/moving transferred data on target ironchef master."
+
+printf "Copying/moving transferred data on target ironchef master."
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-ntest=$(ssh $fqnbn "echo WOULD RUN: $cppath; echo WOULD RUN: $mvpath; echo WOULD RUN: $bndb; echo WOULD RUN: $fordb")
-echo $ntest
+printf "Running as test. Nothing will be executed."
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
-# ssh $fqnbn "$cppath; $mvpath; $bndb; $fordb"
+#ssh $fqnbn << EOF
+# 	cp -a /var/tmp/Migration/${cust}-${code}-transfer/config/* /usr/local/baynote/config/customers/
+#	mv /var/tmp/Migration/${cust}-${code}-transfer/data/* /usr/local/baynote/data/
+#	bndb -e "create database ${cust}_${code}"
+#	for db in ${cust}_$code; do for i in {1..2}; do ssh bn60qs0${i} "bndb -e \"create database ${db};\"";done;done;
+#	sed -i "\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>" /usr/local/baynote/config/cluster.xml
+#   bnSyncThisCluster -y
+   gunzip -c /var/tmp/Migration/${cust}-${code}-transfer/sql/${cust}_${code}.sql.gz | sed "s/${oldbn}/${newbn}/g" | bndb replication
+#EOF
+printf "Copied/moved transferred data on $fqnbn. ${cust}_${code} database created on master and question servers.\n"
+printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart when safe to do so.\n"
