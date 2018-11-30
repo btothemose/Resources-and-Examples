@@ -118,6 +118,14 @@ printf "Running as test. Nothing will be executed."
 #	sed -i "\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>" /usr/local/baynote/config/cluster.xml
 #	bnSyncThisCluster -y
 #	gunzip -c /var/tmp/Migration/${cust}-${code}-transfer/sql/${cust}_${code}.sql.gz | sed "s/${oldbn}/${newbn}/g" | bndb replication
+#	bnsctl StartCustomer ${cust} ${code}
+#	for i in {1..2}; do ssh bn60qs0${i} "bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f";done;
 #EOF
 printf "Copied/moved transferred data on $fqnbn. ${cust}_${code} database created on master and question servers.\n"
 printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart when safe to do so.\n"
+
+##############################
+# Fabric deploy portion
+##############################
+
+printf "Script end"
