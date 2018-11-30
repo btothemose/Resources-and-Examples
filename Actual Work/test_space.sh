@@ -1,8 +1,9 @@
 #!/bin/bash
-echo "enter test customer"
-read cust code
-ssh bn60ms01.dub.baynote.net << EOF
-    echo ${cust} >> cust.doc
-    echo ${code} >> cust.doc
-    cp cust.doc ./test-omer/${cust}.doc
-EOF
+printf "Proceed with target ironchef master section? (y/n)"
+read ictp
+if [[ $ictp != y ]];
+then
+	printf "Terminating."
+	exit 1
+fi
+printf "test"

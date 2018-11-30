@@ -12,20 +12,20 @@
 ##############################
 # Establishing the customer and ironchef master
 ##############################
-printf "Which customer will you be migrating today? (format: cust code)"
+printf "Which customer will you be migrating today? (format: cust code)\n"
 read cust code
-printf "Finding ironchef master for ${cust}_${code}"
+printf "Finding ironchef master for ${cust}_${code}\n"
 oldbn=$(ssh bn03ms01 "find-customer ${cust} ${code}")
 if [[ ${oldbn} == Usag* ]];
 then
-	printf "Nope, you made a typo. Bye."
+	printf "Nope, you made a typo. Bye.\n"
 	exit 1
 elif [[ ${oldbn} == "" ]];
 then
-	printf "${cust}_${code} not found anywhere. You should either panic or check your spelling."
+	printf "${cust}_${code} not found anywhere. You should either panic or check your spelling.\n"
 	exit 1
 fi
-printf ${cust}"_"${code}" found on "${oldbn}". Continue? (y/n)"
+printf ${cust}"_"${code}" found on "${oldbn}". Continue? (y/n)\n"
 read cont1
 
 ##############################
@@ -33,14 +33,14 @@ read cont1
 ##############################
 if [[ $cont1 == y || $cont1 == Y ]];
 then
-	printf "Which ironchef master will you be moving to? (format: bn03)"
+	printf "Which ironchef master will you be moving to? (format: bn03)\n"
 	read newbn
 elif [[ $cont1 == n || $cont1 == N ]];
 then
-	printf "Fine then. Be that way."
+	printf "Fine then. Be that way.\n"
 	exit 1
 else
-	printf "What? That's not a yes or no. Come back sober."
+	printf "What? That's not a yes or no. Come back sober.\n"
 	exit 1
 fi
 
@@ -63,7 +63,7 @@ elif [[ $oldbn == bn60 ]];
 then
 	fqobn="bn60ms01.dub.baynote.net"
 else
-	printf "Error; ironchef master does not exist. This script is probably outdated or otherwise broken."
+	printf "Error; ironchef master does not exist. This script is probably outdated or otherwise broken.\n"
 	exit 1
 fi
 
@@ -86,29 +86,36 @@ elif [[ $newbn == bn60 ]];
 then
 	fqnbn="bn60ms01.dub.baynote.net"
 else
-	printf "Error; ironchef master does not exist. Did you make a typo? You do that sometimes."
+	printf "Error; ironchef master does not exist. Did you make a typo? You do that sometimes.\n"
 	exit 1
 fi
 
 ##############################
 # bnTransferCustomer portion
 ##############################
-printf "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn"
+printf "Beginning bnTransferCustomer for "$cust"_"$code" from $fqobn to $fqnbn\n"
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-printf "Running as test. Nothing will be executed."
-otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn")
+printf "Running as test. Nothing will be executed.\n"
+otest=$(ssh $fqobn "echo WOULD RUN: bnTransferCustomer -c $cust $code -m $fqnbn\n")
 printf $otest
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 #ssh $fqobn "bnTransferCustomer -c $cust $code -m $fqnbn"
-printf "bnTransferCustomer complete for ${cust}_${code} from $fqobn to $fqnbn."
+printf "bnTransferCustomer complete for ${cust}_${code} from $fqobn to $fqnbn.\n"
+printf "Proceed with target ironchef master section? (y/n)\n"
+read ictp
+if [[ $ictp != y ]];
+then
+	printf "Terminating."
+	exit 1
+fi
 
 ##############################
 # Target ironchef master portion
 ##############################
 
-printf "Copying/moving transferred data on target ironchef master."
+printf "Copying/moving transferred data on target ironchef master.\n"
 # vvvvvvvvv Test Lines, Echo Actual Lines vvvvvvvvv
-printf "Running as test. Nothing will be executed."
+printf "Running as test. Nothing will be executed.\n"
 # vvvvvvvvv Actual Migration Lines vvvvvvvvv
 #ssh $fqnbn << EOF
 # 	cp -a /var/tmp/Migration/${cust}-${code}-transfer/config/* /usr/local/baynote/config/customers/
@@ -128,4 +135,4 @@ printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart
 # Fabric deploy portion
 ##############################
 
-printf "Script end"
+printf "Script end.\n"
