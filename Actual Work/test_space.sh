@@ -1,12 +1,14 @@
 #!/bin/bash
 
 test1() {
-    printf "test1 successful\n"
+    test2() {
+        echo "test2"
+    }
+    echo "test1"
 }
-
-test2() {
-    printf "test2 successful\n"
+test3() {
+    test2
+    echo "test3"
 }
-
 test1
-test2
+test3
