@@ -187,4 +187,4 @@ printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart
 # Fabric deploy portion
 ##############################
 
-printf "Script end.\n"
+printf "Script end.\nFabric commands portion not yet implemented."
