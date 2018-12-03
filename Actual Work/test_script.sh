@@ -186,6 +186,20 @@ sqlReplication() {
             exit 1
     fi
 }
+startCustomerOnly() {
+    printf "Starting customer\n"
+    step7=$(ssh $fqnbn bnsctl StartCustomer ${cust} ${code})
+    printf "Master server customer start output:\n${step8}\n"
+    step8=$(ssh $fqnbn "for i in {1..2}; do ssh ${oldbn}qs0${i} \"bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f\";done;")
+    printf "Question servers customer start output:\n${step9}\n"
+    printf "Continue? (y/n)\n"
+    read step9cont
+    if [[ $step9cont != y $step9cont != Y ]];
+        then
+            printf "Terminating. Please finish process manually.\n"
+            exit 1
+    fi
+}
 
 ##############################
 # Target bn master portion - Ironchef
@@ -219,10 +233,9 @@ newMasterSetupThor() {
         printf "Terminating. Please finish process manually.\n"
         exit 1
     fi
-    bnExportThor
     createDatabase
     clusterSync
-    
+    startCustomerOnly
     printf "Copied/moved transferred data on $fqnbn.\n${cust}_${code} database created on master and question servers.\n"
     printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart when safe to do so.\n"
 }
@@ -288,7 +301,7 @@ then
     findMaster
     oldMasterDomain
     newMasterDomain
-    bnTransfer
+    bnExportThor
     newMasterSetupThor
     fabDeploy
     endOutput
