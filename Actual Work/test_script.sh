@@ -268,10 +268,22 @@ EOF
 ##############################
 
 endOutput() {
-    printf "Things that still need to be done:\nbnconfigdb update on master\nbnss - check for issues\n"
-    printf "Schedule customer's jobs\nAdd customer's triggers\nSet gatherEvents lastEventId to 0"
-    printf "Update opsmanager\nEnsure customer is on new recs, and ensure new recs heap size was adjusted"
-    printf "Cutover DNS (low TTL)\nUpdate bas\nCheck calls and admin page\n"
+    printf "Still to-do:
+    > ${newbn}: sudo /home/OPS/refresh_cust.sh
+    > ${newbn}: bnconfigdb update
+    > ${newbn}: bnss
+        (and look for issues)
+    > ${newbn} > Schedule jobs, use info from ${oldbn}, and stop old jobs
+    > ${newbn} > Add triggers to trigger file and bntrig reload
+    > ${newbn} > Set gatherEvents lastEventId to 0
+    > Update opsmanager (insights)
+    > Ensure customer is loaded onto new recs
+    > Ensure rec heap sizes are up-to-date
+    > Check admin page and calls\n
+When done with all of this:
+    > Execute cutover in verisign
+    > Update thorconfig
+    > Ensure jobs are disabled on ${oldbn} and enabled on ${newbn}"
 }
 
 ##############################
@@ -290,12 +302,9 @@ then
     bnTransfer
     newMasterSetupIronchef
     fabDeploy
-    endOutput
     printf "This is the end of the Ironchef portion\n"
 elif [[ $answeric == n || $answeric == N ]];
 then
-    printf "THOR MIGRATION SECTION NOT YET READY"
-    exit 1
     printf "Proceeding with Thor migration\n"
     userCheck
     findMaster
@@ -304,9 +313,10 @@ then
     bnExportThor
     newMasterSetupThor
     fabDeploy
-    endOutput
     printf "This is the end of the Thor portion\n"
 else
     printf "That answer is not useful; maybe you should try again sober."
     exit 1
 fi
+
+endOutput
