@@ -187,4 +187,28 @@ printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart
 # Fabric deploy portion
 ##############################
 
-printf "Script end.\nFabric commands portion not yet implemented."
+printf "Switching user to bnops. Continue? (y/n)\n"
+read bnops
+if [[ $bnops != y ]];
+    then
+        printf "Terminating. Please finish process manually.\n"
+        exit 1
+fi
+sudo su - bnops
+ssh fabric01.sjc01.baynote.net << EOF
+	cd /bnops/fabric/ic_deploy_config_alt/
+	fab cust:${cust} code:${code} cluster:${newbn} copymode:scripts deploy
+	fab cust:${cust} code:${code} cluster:${newbn} copymode:xsl deploy
+	fab cust:${cust} code:${code} cluster:${newbn} copymode:customers deploy
+EOF
+printf "Fab deploy commands complete. Disconnecting from fabric.\nSwitching user back to bnadmin\n"
+sudo su - bnadmin
+
+##############################
+# End of current interation
+##############################
+
+printf "Things that still need to be done:\nbnconfigdb update on master\nbnss - check for issues\n"
+printf "Schedule customer's jobs\nAdd customer's triggers\nSet gatherEvents lastEventId to 0"
+printf "Update opsmanager\nEnsure customer is on new recs, and ensure new recs heap size was adjusted"
+printf "Cutover DNS (low TTL)\nUpdate bas\nCheck calls and admin page\n"
