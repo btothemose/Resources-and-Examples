@@ -4,35 +4,32 @@
 # Preliminary user check
 ##############################
 
-userCheck() {
-    if [[ "$(whoami)" != "bnadmin" ]];
-    then
-	    printf "Must be executed as bnadmin."
-	    exit 1
-    fi
-}
+if [[ "$(whoami)" != "bnadmin" ]];
+then
+    printf "Must be executed as bnadmin."
+    exit 1
+fi
+
+##############################
+# Required variable input
+##############################
+
+read -p "Which customer will you be migrating today? (format: cust code)" cust code
+read -p "Which bn master will you be moving to? (format: bn01)" newbn
 
 ##############################
 # Establishing the customer and bn master
 ##############################
 
 findMaster() {
-    printf "Which customer will you be migrating today? (format: cust code)\n"
-    read cust code
     printf "Finding bn master for ${cust}_${code}\n"
     oldbn=$(ssh bn03ms01 "find-customer ${cust} ${code}")
-    if [[ ${oldbn} == Usag* ]];
-    then
-	    printf "Nope, you made a typo. Bye.\n"
-	    exit 1
-    elif [[ ${oldbn} == "" ]];
-    then
-	    printf "${cust}_${code} not found anywhere. You should either panic or check your spelling.\n"
-	    exit 1
-    fi
-    printf "${cust}_${code} found on ${oldbn}.\n"
-    printf "Which bn master will you be moving to? (format: bn03)\n"
-	read newbn
+    case "$oldbn" in
+        Usag* ) printf "Nope, you made a typo. Terminating.\n";;
+        bn* ) printf "${cust}_${code} found on ${oldbn}.\n";;
+        * ) printf "${cust}_${code} not found anywhere. You should either panic or check your spelling.\n"
+            exit 1;;
+    esac
 }
 
 ##############################
@@ -40,25 +37,15 @@ findMaster() {
 ##############################
 
 oldMasterDomain() {
-    if [[ $oldbn == bn03 || $oldbn == bn11 ]];
-    then
-        fqobn=$oldbn"ms01.sjc01.baynote.net"
-    elif [[ $oldbn == bn20 || $oldbn == bn21 ]];
-    then
-        fqobn=$oldbn"ms01.kord.baynote.net"
-    elif [[ $oldbn == bn40 || $oldbn == bn41 ]];
-    then
-        fqobn=$oldbn"ms01.eham.baynote.net"
-    elif [[ $oldbn == bn50 ]];
-    then
-        fqobn="bn50ms01.pdx01.baynote.net"
-    elif [[ $oldbn == bn60 ]];
-    then
-        fqobn="bn60ms01.dub.baynote.net"
-    else
-        printf "Error; bn master does not exist. This script is probably outdated or otherwise broken.\n"
-        exit 1
-    fi
+    case "${oldbn}" in
+        bn03|bn11 ) fqobn="${oldbn}ms01.sjc01.baynote.net";;
+        bn20|bn21 ) fqobn="${oldbn}ms01.kord.baynote.net";;
+        bn40|bn41 ) fqobn="${oldbn}ms01.eham.baynote.net";;
+        bn50 ) fqobn="bn50ms01.pdx01.baynote.net";;
+        bn60 ) fqobn="bn60ms01.dub.baynote.net";;
+        * ) printf "Error; bn master does not exist. This script is probably outdated or otherwise broken.\n"
+            exit 1;;
+    esac
 }
 
 ##############################
@@ -66,25 +53,15 @@ oldMasterDomain() {
 ##############################
 
 newMasterDomain() {
-    if [[ $newbn == bn03 || $newbn == bn11 ]];
-    then
-        fqnbn=$newbn"ms01.sjc01.baynote.net"
-    elif [[ $newbn == bn20 || $newbn == bn21 ]];
-    then
-        fqnbn=$newbn"ms01.kord.baynote.net"
-    elif [[ $newbn == bn40 || $newbn == bn41 ]];
-    then
-        fqnbn=$newbn"ms01.eham.baynote.net"
-    elif [[ $newbn == bn50 ]];
-    then
-        fqnbn="bn50ms01.pdx01.baynote.net"
-    elif [[ $newbn == bn60 ]];
-    then
-        fqnbn="bn60ms01.dub.baynote.net"
-    else
-        printf "Error; bn master does not exist. Did you make a typo? You do that sometimes.\n"
-        exit 1
-    fi
+    case "${newbn}" in
+        bn03|bn11 ) fqnbn="${newbn}ms01.sjc01.baynote.net";;
+        bn20|bn21 ) fqnbn="${newbn}ms01.kord.baynote.net";;
+        bn40|bn41 ) fqnbn="${newbn}ms01.eham.baynote.net";;
+        bn50 ) fqnbn="bn50ms01.pdx01.baynote.net";;
+        bn60 ) fqnbn="bn60ms01.dub.baynote.net";;
+        * ) printf "Error; bn master does not exist. This script is probably outdated or otherwise broken.\n"
+            exit 1;;
+    esac
 }
 
 ##############################
@@ -92,20 +69,17 @@ newMasterDomain() {
 ##############################
 
 bnTransfer() {
-    printf "About to proceed with bnTransferCustomer for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n)\n"
-    read ictp1
-    if [[ $ictp1 != y || $ictp1 != Y ]];
-    then
-        printf "Terminating.\n"
-        exit 1
-    fi
-    printf "Beginning bnTransferCustomer for ${cust}_${code} from ${fqobn} to ${fqnbn}\n"
+    read -p "About to proceed with bnTransferCustomer for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n) " ictp1
+    case "$ictp1" in
+        y|Y ) printf "Beginning bnTransferCustomer for ${cust}_${code} from ${fqobn} to ${fqnbn}\n";;
+        * ) printf "Terminating.\n"
+            exit 1;;
+    esac
     ssh $fqobn "bnTransferCustomer -c ${cust} ${code} -m ${fqnbn}"
     printf "bnTransferCustomer complete for ${cust}_${code} from ${fqobn} to ${fqnbn}.\n"
 }
 bnExportThor() {
-    printf "About to proceed with bnexport for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n)\n"
-    read ttp1
+    read -p "About to proceed with bnexport for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n) " ttp1
     if [[ $ttp1 != y || $ttp1 != Y ]];
     then
         printf "Terminating.\n"
@@ -188,10 +162,10 @@ sqlReplication() {
 }
 startCustomerOnly() {
     printf "Starting customer\n"
-    step7=$(ssh $fqnbn bnsctl StartCustomer ${cust} ${code})
-    printf "Master server customer start output:\n${step8}\n"
-    step8=$(ssh $fqnbn "for i in {1..2}; do ssh ${oldbn}qs0${i} \"bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f\";done;")
-    printf "Question servers customer start output:\n${step9}\n"
+    step8a=$(ssh $fqnbn bnsctl StartCustomer ${cust} ${code})
+    printf "Master server customer start output:\n${step8a}\n"
+    step9a=$(ssh $fqnbn "for i in {1..2}; do ssh ${oldbn}qs0${i} \"bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f\";done;")
+    printf "Question servers customer start output:\n${step9a}\n"
     printf "Continue? (y/n)\n"
     read step9cont
     if [[ $step9cont != y $step9cont != Y ]];

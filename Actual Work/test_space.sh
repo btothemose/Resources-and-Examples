@@ -1,20 +1,10 @@
 #!/bin/bash
-
-newbn="bn60"
-
-    printf "Still to-do:
-    > ${newbn}: sudo /home/OPS/refresh_cust.sh
-    > ${newbn}: bnconfigdb update
-    > ${newbn}: bnss
-        (and look for issues)
-    > ${newbn} > Schedule jobs, use info from ${oldbn}, and stop old jobs
-    > ${newbn} > Add triggers to trigger file and bntrig reload
-    > ${newbn} > Set gatherEvents lastEventId to 0
-    > Update opsmanager (insights)
-    > Ensure customer is loaded onto new recs
-    > Ensure rec heap sizes are up-to-date
-    > Check admin page and calls\n
-When done with all of this:
-    > Execute cutover in verisign
-    > Update thorconfig
-    > Ensure jobs are disabled on ${oldbn} and enabled on ${newbn}"
+    read -p "give me a fake cust and code " cust code
+    printf "Finding bn master for ${cust}_${code}\n"
+    read -p "give me a fake bn master " oldbn
+    case "$oldbn" in
+        Usag* ) printf "Nope, you made a typo. Terminating.\n";;
+        bn* ) printf "${cust}_${code} found on ${oldbn}.\n";;
+        * ) printf "${cust}_${code} not found anywhere. You should either panic or check your spelling.\n"
+            exit 1;;
+    esac
