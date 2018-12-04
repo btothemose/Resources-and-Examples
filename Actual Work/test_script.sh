@@ -80,12 +80,11 @@ bnTransfer() {
 }
 bnExportThor() {
     read -p "About to proceed with bnexport for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n) " ttp1
-    if [[ $ttp1 != y || $ttp1 != Y ]];
-    then
-        printf "Terminating.\n"
-        exit 1
-    fi
-    printf "Beginning bnexport for ${cust}_${code} from ${fqobn} to ${fqnbn}\n"
+    case "$ttp1" in
+        y|Y ) printf "Beginning bnexport for ${cust}_${code} from ${fqobn} to ${fqnbn}\n";;
+        * ) printf "Terminating.\n"
+            exit 1;;
+    esac
     ssh ${fqobn} "bnexport ${cust} ${code} --noMappers --noAPU --noObservations"
     ssh ${fqnbn} "mkdir -p /var/tmp/Migration/${cust}/"
     ssh ${fqobn} "rsync -aiv /home/OPS/customer_exports/bnc_files/${cust}-${code}-*.bnc ${fqnbn}:/var/tmp/Migration/"
