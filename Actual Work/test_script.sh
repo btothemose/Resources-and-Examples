@@ -14,8 +14,9 @@ fi
 # Required variable input
 ##############################
 
-read -p "Which customer will you be migrating today? (format: cust code)" cust code
-read -p "Which bn master will you be moving to? (format: bn01)" newbn
+read -p "Which customer will you be migrating today? (format: cust code) " cust code
+read -p "Which bn master will you be moving ${cust} ${code} to? (format: bn01) " newbn
+read -p "Is this an Ironchef customer? (y/n) " answerIron
 
 ##############################
 # Establishing the customer and bn master
@@ -281,10 +282,8 @@ When done with all of this:
 # Workflow selection and sequence
 ##############################
 
-printf "Is this an Ironchef customer? (y/n)\n"
-read answeric
-if [[ $answeric == y || $answeric == Y ]];
-then
+case "$answerIron" in
+y|Y )
     printf "Proceeding with Ironchef migration\n"
     findMaster
     oldMasterDomain
@@ -293,8 +292,8 @@ then
     newMasterSetupIronchef
     fabDeploy
     printf "This is the end of the Ironchef portion\n"
-elif [[ $answeric == n || $answeric == N ]];
-then
+    ;;
+n|N )
     printf "Proceeding with Thor migration\n"
     findMaster
     oldMasterDomain
@@ -303,9 +302,11 @@ then
     newMasterSetupThor
     fabDeploy
     printf "This is the end of the Thor portion\n"
-else
-    printf "That answer is not useful; maybe you should try again sober."
+    ;;
+* )
+    printf "Last response not recognized. Maybe now isn't the best time for you.\n"
     exit 1
-fi
+    ;;
+esac
 
 endOutput
