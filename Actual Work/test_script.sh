@@ -78,6 +78,7 @@ bnTransfer() {
     ssh $fqobn "bnTransferCustomer -c ${cust} ${code} -m ${fqnbn}"
     printf "bnTransferCustomer complete for ${cust}_${code} from ${fqobn} to ${fqnbn}.\n"
 }
+
 bnExportThor() {
     read -p "About to proceed with bnexport for ${cust}_${code} on ${fqobn} to ${fqnbn}\nContinue? (y/n) " ttp1
     case "$ttp1" in
@@ -111,12 +112,13 @@ copyMoveData() {
     fi
     printf "Continue? (y/n)\n"
     read step2cont
-    if [[ $step2cont != y || $step2cont != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    case "${step2cont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
 }
+
 createDatabase() {
     printf "Creating ${cust}_${code} database\n"
     step3=$(ssh $fqnbn bndb -e "create database ${cust}_${code}")
@@ -124,12 +126,13 @@ createDatabase() {
     step4=$(ssh $fqnbn "for db in ${cust}_${code}; do for i in {1..2}; do ssh ${oldbn}qs0${i} \"bndb -e \\\"create database ${db};\\\"\";done;done;")
     printf "Question database creation output:\n${step4}\nContinue? (y/n)\n"
     read step4cont
-    if [[ $step4cont != y || $step4cont != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    case "${step4cont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
 }
+
 clusterSync() {
     printf "Appending cluster.xml to include ${cust}-${code}\n"
     step5=$(ssh $fqnbn sed -i "\$i  <customer name=\"${cust}\" code=\"${code}\" template=\"NORMAL1\"/>" /usr/local/baynote/config/cluster.xml)
@@ -137,12 +140,13 @@ clusterSync() {
     step6=$(ssh $fqnbn bnSyncThisCluster -y)
     printf "Cluster sync output:\n${step6}\nContinue? (y/n)\n"
     read step6cont
-    if [[ $step6cont != y || $step6cont != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    case "${step6cont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
 }
+
 sqlReplication() {
     printf "Sql transfer and replication beginning\n"
     step7=$(ssh $fqnbn "gunzip -c /var/tmp/Migration/${cust}-${code}-transfer/sql/${cust}_${code}.sql.gz | sed \"s/${oldbn}/${newbn}/g\" | bndb replication")
@@ -153,25 +157,38 @@ sqlReplication() {
     printf "Question servers customer start output:\n${step9}\n"
     printf "Continue? (y/n)\n"
     read step9cont
-    if [[ $step9cont != y $step9cont != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    case "${step9cont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
 }
+
 startCustomerOnly() {
     printf "Starting customer\n"
-    step8a=$(ssh $fqnbn bnsctl StartCustomer ${cust} ${code})
-    printf "Master server customer start output:\n${step8a}\n"
-    step9a=$(ssh $fqnbn "for i in {1..2}; do ssh ${oldbn}qs0${i} \"bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f\";done;")
-    printf "Question servers customer start output:\n${step9a}\n"
+    startMasterOutput=$(ssh $fqnbn bnsctl StartCustomer ${cust} ${code})
+    printf "Master server customer start output:\n${startMasterOutput}\n"
+    startQuestionOutput=$(ssh $fqnbn "for i in {1..2}; do ssh ${oldbn}qs0${i} \"bnsctl StartCustomer ${cust} ${code}; bnscript -c ${cust} ${code} -f\";done;")
+    printf "Question servers customer start output:\n${startQuestionOutput}\n"
     printf "Continue? (y/n)\n"
-    read step9cont
-    if [[ $step9cont != y $step9cont != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    read startCustCont
+    case "${startCustCont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
+}
+
+bnImportThor () {
+    printf "Executing bnimport for ${cust} ${code}\n"
+    importOutput=$(ssh $fqnbn "bnimport /var/tmp/Migration/${cust}-${code}-*.bnc")
+    printf "bnimport output:\n${importOutput}\n"
+    read -p "Continue? (y/n) " importCont
+    case "${importCont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit1 ;;
+    esac
 }
 
 ##############################
@@ -201,11 +218,12 @@ newMasterSetupIronchef() {
 newMasterSetupThor() {
     printf "Proceed with ${fqnbn} section? (y/n)\n"
     read ttp2
-    if [[ $ttp2 != y || $ttp2 != Y ]];
-    then
-        printf "Terminating. Please finish process manually.\n"
-        exit 1
-    fi
+    case "${ttp2}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+            exit 1 ;;
+    esac
+    bnImportThor
     createDatabase
     clusterSync
     startCustomerOnly
@@ -219,12 +237,12 @@ newMasterSetupThor() {
 
 fabDeploy() {
     printf "Switching user to bnops. Continue? (y/n)\n"
-    read bnops
-    if [[ $bnops != y || $bnops != Y ]];
-        then
-            printf "Terminating. Please finish process manually.\n"
-            exit 1
-    fi
+    read bnopsCont
+    case "${bnopsCont}" in
+        y|Y ) ;;
+        * ) printf "Terminating. Please finish process manually.\n"
+        exit 1 ;;
+    esac
     sudo su - bnops
     ssh fabric01.sjc01.baynote.net << EOF
         cd /bnops/fabric/ic_deploy_config_alt/
@@ -268,7 +286,6 @@ read answeric
 if [[ $answeric == y || $answeric == Y ]];
 then
     printf "Proceeding with Ironchef migration\n"
-    userCheck
     findMaster
     oldMasterDomain
     newMasterDomain
@@ -279,7 +296,6 @@ then
 elif [[ $answeric == n || $answeric == N ]];
 then
     printf "Proceeding with Thor migration\n"
-    userCheck
     findMaster
     oldMasterDomain
     newMasterDomain

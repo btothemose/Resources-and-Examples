@@ -1,10 +1,10 @@
 #!/bin/bash
 
-var=t
+read -p "enter something " var
 
 case $var in
-    "" ) echo "empty";;
-    * ) echo "test";;
+    "s" ) ;;
+    * ) echo "bad";;
 esac
 
 echo "complete"
