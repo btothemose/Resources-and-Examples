@@ -1,14 +1,18 @@
 #!/usr/bin/python/
 
-import os
-from fabric.api import *
+import subprocess
+import sys
 
 host="prod-ebcp03.dub.baynote.net"
 command="pwd"
 
-env.user = os.getenv('ben.moseley', 'vagrant')
-env.password = os.getenv('password', 'vagrant')
-
-@hosts(host)
-def do_something():
-    run(command)
+ssh = subprocess.Popen(["ssh", "%s" % host, command],
+                            shell=False,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+result = ssh.stdout.readlines()
+if result == []:
+    error = ssh.stderr.readlines()
+    print >>sys.stderr, "ERROR: %s" % error
+else:
+    print result
