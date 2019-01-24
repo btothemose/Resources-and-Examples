@@ -124,7 +124,7 @@ createDatabase() {
     printf "Creating ${cust}_${code} database\n"
     step3=$(ssh $fqnbn bndb -e "create database ${cust}_${code}")
     printf "Master database creation output:\n${step3}\n"
-    step4=$(ssh $fqnbn "for db in ${cust}_${code}; do for i in {1..2}; do ssh ${oldbn}qs0${i} \"bndb -e \\\"create database ${db};\\\"\";done;done;")
+    step4=$(ssh $fqnbn "for db in ${cust}_${code}; do for i in {1..2}; do ssh ${newbn}qs0${i} \"bndb -e \\\"create database ${db};\\\"\";done;done;")
     printf "Question database creation output:\n${step4}\nContinue? (y/n)\n"
     read step4cont
     case "${step4cont}" in
@@ -188,7 +188,7 @@ bnImportThor () {
     case "${importCont}" in
         y|Y ) ;;
         * ) printf "Terminating. Please finish process manually.\n"
-            exit1 ;;
+            exit 1 ;;
     esac
 }
 
@@ -224,9 +224,9 @@ newMasterSetupThor() {
         * ) printf "Terminating. Please finish process manually.\n"
             exit 1 ;;
     esac
-    bnImportThor
-    createDatabase
     clusterSync
+    createDatabase
+    bnImportThor
     startCustomerOnly
     printf "Copied/moved transferred data on $fqnbn.\n${cust}_${code} database created on master and question servers.\n"
     printf "${cust}_{$code} has been added to cluster.xml. \nExecute baynote-restart when safe to do so.\n"
