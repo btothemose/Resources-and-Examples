@@ -1,0 +1,43 @@
+
+import org.jvnet.hudson.plugins.shelveproject.ShelveProjectTask
+
+def daysBack=45;
+Jenkins.instance.getAllItems(AbstractProject.class).each{ it->
+  def lastBuild=it.getLastBuild()
+  if(lastBuild != null){
+    def back = Calendar.getInstance()
+    back.set(Calendar.DAY_OF_YEAR,back.get(Calendar.DAY_OF_YEAR)-daysBack)
+    if (lastBuild.getTime().compareTo(back.getTime()) < 0) {
+      println it.name + " was built over " + daysBack + " days ago: " + lastBuild.getTime()
+      if (it instanceof AbstractProject){
+      def spt=  new ShelveProjectTask(it)
+        Hudson.getInstance().getQueue().schedule(spt , 0 );
+      }else{
+        println it.name + " was not shelved----------- "
+      }
+    }
+  }
+}
+
+
+import org.jvnet.hudson.plugins.shelveproject.ShelveProjectTask
+
+def daysBack=45;
+Jenkins.instance.getAllItems(AbstractProject.class).each{ it->
+  def lastBuild=it.getLastBuild()
+    if(it.name.startsWith("BuildThor") || it.name.startsWith("IntTestThor")){
+      if(lastBuild != null){
+      def back = Calendar.getInstance()
+      back.set(Calendar.DAY_OF_YEAR,back.get(Calendar.DAY_OF_YEAR)-daysBack)
+        if (lastBuild.getTime().compareTo(back.getTime()) < 0) {
+        println it.name + " was built over " + daysBack + " days ago: " + lastBuild.getTime()
+          if (it instanceof AbstractProject){
+          def spt=  new ShelveProjectTask(it)
+          Hudson.getInstance().getQueue().schedule(spt , 0 );
+          }else{
+println it.name + " was not shelved----------- "
+}
+}
+}
+}
+} 
